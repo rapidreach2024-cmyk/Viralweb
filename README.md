@@ -1,17 +1,12 @@
 # Crossposter — source releases
 
-This repository contains the complete source of the
-[Crossposter](https://crossposter.mochi.is) browser extension, published once
-per release. Each commit corresponds to one released version (tagged
-`v<version>`), so you can diff any two releases to see exactly what changed in
-the code that runs in your browser.
-
+ 
 Crossposter captures a post and prepares it in the native composers of
 Upscrolled, LinkedIn, X, Bluesky, Instagram, Threads, and Facebook.
 
 ## Why this repo exists
 
-Crossposter is distributed outside the public store listings (unlisted), so
+viralweb is distributed outside the public store listings (unlisted), so
 there is no store page to inspect. This repo is the audit trail: the exact
 source for every signed build, plus the scripts to reproduce those builds
 byte-for-byte.
