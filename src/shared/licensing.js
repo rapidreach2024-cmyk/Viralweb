@@ -45,11 +45,16 @@ function deriveChecksum(keyBody) {
 
 export function generateLicenseKey() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let body = "";
-  for (let i = 0; i < KEY_PARTS * KEY_CHARS_PER_PART; i++) {
-    body += chars[Math.floor(Math.random() * chars.length)];
+  const parts = [];
+  for (let p = 0; p < KEY_PARTS; p++) {
+    let part = "";
+    for (let i = 0; i < KEY_CHARS_PER_PART; i++) {
+      part += chars[Math.floor(Math.random() * chars.length)];
+    }
+    parts.push(part);
   }
-  return `${LICENSE_PREFIX}${body}-${deriveChecksum(body)}`;
+  const body = parts.join("");
+  return `${LICENSE_PREFIX}${parts.join("-")}-${deriveChecksum(body)}`;
 }
 
 export function validateLicenseKey(input = "") {
