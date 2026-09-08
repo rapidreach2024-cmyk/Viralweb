@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Crossposter",
+  "name": "Viralweb — One-Click Reposter",
   "version": "0.2.7",
-  "description": "A free, open-source browser extension to share social media post – text, images, and even video – from one platform to another.",
+  "description": "Repost and repurpose social media content to every platform in one click. 25 free reposts, then a lifetime license.",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
@@ -54,7 +54,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Open Crossposter",
+    "default_title": "Open Viralweb",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png"

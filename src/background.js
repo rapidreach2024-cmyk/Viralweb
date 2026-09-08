@@ -15,8 +15,9 @@ import { CROSSPOST_SESSIONS_KEY, crosspostComposerUrl, recordPostedDestination, 
 import { markVideoResolving, settleVideoResolution } from "./shared/video-resolution-state.js";
 import { resolvePageVideoHint } from "./shared/source-video.js";
 import { allPlatformIds, incompletePlatformPermissions, missingSitePlatforms, SITE_ACCESS_DISMISSED_KEY, SITE_ACCESS_PAGE } from "./shared/platform-permissions.js";
+import { getLicenseState, recordUsage } from "./shared/licensing.js";
 
-const MENU_ID = "crosspost-studio";
+const MENU_ID = "viralweb-repost";
 let trayWindowId = null;
 const scopedSidePanel = Boolean(ext.sidePanel?.setOptions && ext.sidePanel?.open);
 let sidePanelOptionsQueue = Promise.resolve();
@@ -93,7 +94,7 @@ ext.runtime.onInstalled.addListener(async details => {
   await ext.contextMenus.removeAll();
   await ext.contextMenus.create({
     id: MENU_ID,
-    title: "Crosspost",
+    title: "Repost with Viralweb",
     contexts: ["page", "selection", "link", "image", "video"],
     documentUrlPatterns: platformDocumentUrlPatterns()
   });
@@ -540,6 +541,16 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .catch(error => sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) }));
     return true;
   }
+  if (message?.type === "GET_LICENSE_STATE") {
+    getLicenseState(ext.storage).then(state => sendResponse({ ok: true, ...state })).catch(error => sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) }));
+    return true;
+  }
+  if (message?.type === "ACTIVATE_LICENSE") {
+    import("./shared/licensing.js").then(({ activateLicense }) => activateLicense(ext.storage, message.key))
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({ ok: false, error: error instanceof Error ? error.message : String(error) }));
+    return true;
+  }
   if (message?.type === "OPEN_NATIVE_TRAY") {
     // sidePanel.open() must be invoked synchronously while Chrome still carries
     // the Compose button's user activation through this message handler.
@@ -553,8 +564,16 @@ ext.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
   if (message?.type === "OPEN_NATIVE_HANDOFF") {
+    const licenseState = await getLicenseState(ext.storage);
+    if (!licenseState.canUse) {
+      sendResponse({ ok: false, error: "You’ve used your 25 free reposts. Unlock Viralweb Pro with a license key to keep going." });
+      return;
+    }
     openNativeHandoffs(message.sessionId, message.attemptId, message.networks, message.handoff, sender.tab?.windowId, sender.tab?.id)
-      .then(result => sendResponse({ ok: true, ...result }))
+      .then(async result => {
+        if (!result.cancelled) await recordUsage(ext.storage);
+        sendResponse({ ok: true, ...result });
+      })
       .catch(error => markCrosspostError(message.sessionId, error, message.attemptId).then(message => sendResponse({ ok: false, error: message })));
     return true;
   }

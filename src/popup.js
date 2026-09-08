@@ -1,8 +1,10 @@
 import { ext } from "./shared/browser.js";
 import { missingSitePlatforms, platformLabel, requestCompletePlatformPermissions } from "./shared/platform-permissions.js";
+import { getLicenseState } from "./shared/licensing.js";
 
 const siteAccess = document.querySelector("#siteAccess");
 const allowSiteAccess = document.querySelector("#allowSiteAccess");
+const licenseBanner = document.querySelector("#licenseBanner");
 let missingSiteAccess = [];
 allowSiteAccess.onclick = async () => {
   allowSiteAccess.disabled = true;
@@ -18,8 +20,18 @@ allowSiteAccess.onclick = async () => {
 missingSitePlatforms(ext.permissions, ext.runtime.getManifest()).then(missing => {
   missingSiteAccess = missing;
   if (!missing.length) return;
-  document.querySelector("#siteAccessText").textContent = `Allow access to ${missing.map(platformLabel).join(", ")} so Crossposter can capture posts and fill each composer.`;
+  document.querySelector("#siteAccessText").textContent = `Allow access to ${missing.map(platformLabel).join(", ")} so Viralweb can capture posts and fill each composer.`;
   siteAccess.hidden = false;
+}).catch(() => {});
+
+getLicenseState(ext.storage).then(state => {
+  if (state.licensed) return;
+  licenseBanner.hidden = false;
+  const remaining = Number.isFinite(state.remaining) ? state.remaining : 0;
+  licenseBanner.className = remaining === 0 ? "license-banner exhausted" : "license-banner warning";
+  licenseBanner.innerHTML = remaining === 0
+    ? `<strong>Free reposts used</strong><span>Activate a lifetime license to keep going.</span>`
+    : `<strong>${remaining} free repost${remaining === 1 ? "" : "s"} left</strong><span>Unlock unlimited reposts with a one-time license.</span>`;
 }).catch(() => {});
 
 document.querySelector("#showInfo").onclick = async () => {

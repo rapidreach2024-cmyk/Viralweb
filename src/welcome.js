@@ -45,7 +45,7 @@ async function render() {
   later.textContent = done ? "Close" : resuming ? "Cancel crosspost" : "Not now";
   if (done && !resuming) {
     document.querySelector("h1").textContent = "You’re all set";
-    hint.textContent = "Right-click any post on a supported site and choose Crosspost.";
+    hint.textContent = "Right-click any post on a supported site and choose Viralweb → Repost.";
   }
   if (resuming) await resumeCapture();
   return missing;
