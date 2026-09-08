@@ -276,6 +276,20 @@ input, select { color: #111; background: #fff; }
 .settings-card form label { display: block; margin: 18px 0; font-weight: 650; }
 .settings-card input { display: block; width: 100%; margin-top: 6px; padding: 11px; border: 1px solid #111; border-radius: 1px; }
 
+.license-banner { display: grid; gap: 4px; margin: 14px 0; padding: 14px 16px; border: 1px solid #111; background: #fffbe6; }
+.license-banner strong { display: block; font-size: 13px; }
+.license-banner span { font-size: 12px; color: #333; }
+.license-banner.warning { background: #fff4e6; }
+.license-banner.exhausted { color: #fff; background: #a12424; border-color: #a12424; }
+.license-banner.exhausted span { color: #fff0f0; }
+.settings-licensing { margin-top: 24px; padding-top: 20px; border-top: 1px solid #aaa; }
+.settings-licensing strong { display: block; font-size: 13px; }
+.settings-licensing p { margin: 5px 0 12px; color: #666; font-size: 13px; }
+.settings-licensing .license-key-label { display: block; margin: 12px 0 6px; font-size: 12px; font-weight: 650; }
+.settings-licensing input { width: 100%; margin-bottom: 10px; padding: 11px; border: 1px solid #111; text-transform: uppercase; letter-spacing: .04em; }
+.settings-licensing .primary { width: 100%; margin-top: 6px; }
+.settings-licensing .fineprint { margin-top: 10px; text-align: left; }
+
 .popup { width: 340px; min-height: 0; background: #fff; }
 .popup-card { position: relative; padding: 28px; border: 0; background: #fff; text-align: left; }
 .popup-card .popup-actions { position: absolute; top: 22px; right: 22px; display: flex; gap: 7px; }

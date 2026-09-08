@@ -15,6 +15,7 @@ import { isFreshComposerUrl } from "./shared/compose-mode.js";
 import { CROSSPOST_SESSIONS_KEY, crosspostSessionIdFromUrl } from "./shared/crosspost-sessions.js";
 import { settleVideoResolution } from "./shared/video-resolution-state.js";
 import { incompletePlatformPermissions, platformLabel, requestCompletePlatformPermissions } from "./shared/platform-permissions.js";
+import { activateLicense, formatLicenseKey, FREE_REPOSTS, getLicenseState } from "./shared/licensing.js";
 
 const showInfo = document.querySelector("#showInfo");
 // Onboarding markup is only needed when the info button is used; import it on
@@ -72,6 +73,7 @@ const settingsDialog = document.querySelector("#settingsDialog"), settingsDestin
 const settingsInlineActions = document.querySelector("#settingsInlineActions"), settingsError = document.querySelector("#settingsError");
 const settingsClearData = document.querySelector("#settingsClearData"), settingsClearError = document.querySelector("#settingsClearError");
 const historyDialog = document.querySelector("#historyDialog"), historyList = document.querySelector("#historyList");
+const licenseBanner = document.querySelector("#licenseBanner"), licenseKey = document.querySelector("#licenseKey"), licenseActivate = document.querySelector("#licenseActivate"), licenseError = document.querySelector("#licenseError"), licenseRemaining = document.querySelector("#licenseRemaining"), licenseCopy = document.querySelector("#licenseCopy");
 const clipDialog = document.querySelector("#clipDialog"), clipPreview = document.querySelector("#clipPreview");
 const clipStart = document.querySelector("#clipStart"), clipEnd = document.querySelector("#clipEnd");
 const clipStartLabel = document.querySelector("#clipStartLabel"), clipEndLabel = document.querySelector("#clipEndLabel");
@@ -98,7 +100,7 @@ draft.destinations = initialDraftDestinations(draft, stored[DEFAULT_DESTINATIONS
 // from IndexedDB and stays off the critical path.
 text.value = draft.text; text.placeholder = "What do you want to share?";
 renderMeta(); renderDestinations();
-console.debug(`[crossposter] first paint ${Math.round(performance.now())}ms since navigation (module start ${Math.round(moduleStartAt)}ms, data loaded ${Math.round(dataLoadedAt)}ms)`);
+console.debug(`[viralweb] first paint ${Math.round(performance.now())}ms since navigation (module start ${Math.round(moduleStartAt)}ms, data loaded ${Math.round(dataLoadedAt)}ms)`);
 draft.media = await hydrateStoredMedia(draft.media);
 renderAll();
 composerReady = true;
@@ -119,6 +121,8 @@ text.addEventListener("input", () => { draft.text = text.value; renderMeta(); })
 document.querySelector("#settingsOpen").onclick = openSettings;
 document.querySelector("#settingsVersion").textContent = `v${ext.runtime.getManifest().version}`;
 document.querySelector("#settingsClose").onclick = closeSettings;
+licenseKey.addEventListener("input", () => { licenseKey.value = formatLicenseKey(licenseKey.value); licenseError.textContent = ""; });
+licenseActivate.onclick = submitLicenseActivation;
 document.querySelector("#settingsCancel").onclick = closeSettings;
 document.querySelector("#settingsSave").onclick = saveSettings;
 settingsClearData.onclick = clearAllData;
@@ -200,7 +204,7 @@ async function initializeSourcePermissions() {
 function showSourcePermissionGate(error = "") {
   const platform = platformLabel(draft.sourceNetwork);
   permissionTitle.textContent = `Allow access to ${platform}`;
-  permissionCopy.textContent = `Crossposter needs access to ${platform} and its related media services as one set. This prevents incomplete captures and media errors.`;
+  permissionCopy.textContent = `Viralweb needs access to ${platform} and its related media services as one set. This prevents incomplete captures and media errors.`;
   permissionError.textContent = error;
   permissionAllow.disabled = false;
   permissionAllow.textContent = "Allow access";
@@ -214,7 +218,7 @@ async function grantSourcePermissions() {
   const result = await requestCompletePlatformPermissions(ext.permissions, [draft.sourceNetwork]);
   if (!result.ok) {
     const platform = result.missing.map(platformLabel).join(", ") || platformLabel(draft.sourceNetwork);
-    showSourcePermissionGate(result.error || `Allow every requested permission for ${platform} to use it with Crossposter.`);
+    showSourcePermissionGate(result.error || `Allow every requested permission for ${platform} to use it with Viralweb.`);
     return;
   }
   permissionDialog.close();
@@ -228,7 +232,7 @@ async function cancelPermissionGate() {
   if (!response?.ok) {
     permissionCancel.disabled = false;
     permissionAllow.disabled = false;
-    permissionError.textContent = response?.error || "This Crossposter draft could not be closed.";
+    permissionError.textContent = response?.error || "This Viralweb draft could not be closed.";
   }
 }
 
@@ -237,7 +241,7 @@ async function sourcePermissionsReady() {
     ? await ext.runtime.sendMessage({ type: "RESUME_CAPTURED_VIDEO", sessionId }).catch(error => ({ ok: false, error: error instanceof Error ? error.message : String(error) }))
     : { ok: true };
   if (!response?.ok) {
-    showSourcePermissionGate(response?.error || "Crossposter could not verify access to this platform.");
+    showSourcePermissionGate(response?.error || "Viralweb could not verify access to this platform.");
     return;
   }
   if (response.resumed && Array.isArray(response.media)) {
@@ -296,7 +300,76 @@ function renderDestinations() {
   renderPublishAction();
 }
 
+let currentLicense = { licensed: false, key: "", used: 0, remaining: FREE_REPOSTS, canUse: true };
+refreshLicenseState();
+
+async function refreshLicenseState() {
+  try {
+    const response = await ext.runtime.sendMessage({ type: "GET_LICENSE_STATE" }).catch(() => null);
+    currentLicense = response?.ok ? response : currentLicense;
+  } catch {}
+  renderLicense();
+}
+
+function renderLicense() {
+  const licensed = currentLicense.licensed === true;
+  const remaining = Number.isFinite(currentLicense.remaining) ? currentLicense.remaining : 0;
+  licenseRemaining.textContent = licensed ? "∞ unlimited" : String(remaining);
+  licenseCopy.firstChild.textContent = licensed ? "Reposts: " : "Free reposts left: ";
+  if (licensed) {
+    licenseBanner.hidden = true;
+    licenseKey.value = currentLicense.key || "";
+    licenseKey.disabled = true;
+    licenseActivate.textContent = "Activated ✓";
+    licenseActivate.disabled = true;
+    return;
+  }
+  licenseKey.disabled = false;
+  licenseActivate.textContent = remaining === 0 ? "Unlock lifetime Pro" : "Activate lifetime Pro";
+  licenseActivate.disabled = false;
+  if (remaining <= 5) {
+    licenseBanner.hidden = false;
+    licenseBanner.className = remaining === 0 ? "license-banner exhausted" : "license-banner warning";
+    licenseBanner.innerHTML = remaining === 0
+      ? `<strong>Free limit reached</strong><span>Activate a lifetime license to keep reposting.</span>`
+      : `<strong>${remaining} free repost${remaining === 1 ? "" : "s"} left</strong><span>Unlock unlimited reposts with a one-time license key.</span>`;
+  } else {
+    licenseBanner.hidden = true;
+  }
+}
+
+async function submitLicenseActivation() {
+  licenseError.textContent = "";
+  licenseActivate.disabled = true;
+  licenseActivate.textContent = "Checking…";
+  const response = await ext.runtime.sendMessage({ type: "ACTIVATE_LICENSE", key: licenseKey.value }).catch(error => ({ ok: false, error: error instanceof Error ? error.message : String(error) }));
+  if (response?.ok) {
+    await refreshLicenseState();
+    showToast("Viralweb Pro activated — unlimited reposts!");
+    return;
+  }
+  licenseError.textContent = response?.error || "That key didn’t work. Check it and try again.";
+  licenseActivate.disabled = false;
+  licenseActivate.textContent = "Unlock lifetime Pro";
+}
+
 function openSettings() {
+  licenseError.textContent = "";
+  if (currentLicense.licensed) {
+    licenseKey.value = currentLicense.key || "";
+    licenseKey.disabled = true;
+    licenseActivate.textContent = "Activated ✓";
+    licenseActivate.disabled = true;
+    licenseRemaining.textContent = "∞ unlimited";
+    licenseCopy.firstChild.textContent = "Reposts: ";
+  } else {
+    licenseKey.value = "";
+    licenseKey.disabled = false;
+    licenseActivate.textContent = "Unlock lifetime Pro";
+    licenseActivate.disabled = false;
+    licenseRemaining.textContent = String(Number.isFinite(currentLicense.remaining) ? currentLicense.remaining : FREE_REPOSTS);
+    licenseCopy.firstChild.textContent = "Free reposts left: ";
+  }
   setHtml(settingsDestinations, NATIVE_DESTINATIONS.map(destination => {
     const enabled = enabledPlatforms.includes(destination.id);
     const checked = defaultDestinations.includes(destination.id);
@@ -403,15 +476,15 @@ async function saveSettings() {
 }
 
 async function clearAllData() {
-  if (!confirm("Clear all Crossposter data? This deletes saved drafts, history, preferences, reminders, temporary media, and other open Crossposter sessions.")) return;
+  if (!confirm("Clear all Viralweb data? This deletes saved drafts, history, preferences, reminders, temporary media, and other open Viralweb sessions.")) return;
   settingsClearData.disabled = true;
   settingsClearData.textContent = "Clearing…";
   settingsClearError.textContent = "";
   const response = await ext.runtime.sendMessage({ type: "CLEAR_ALL_CROSSPOSTER_DATA", sessionId }).catch(error => ({ ok: false, error: error instanceof Error ? error.message : String(error) }));
   if (!response?.ok) {
     settingsClearData.disabled = false;
-    settingsClearData.textContent = "Clear all Crossposter data";
-    settingsClearError.textContent = response?.error || "Crossposter data could not be cleared.";
+    settingsClearData.textContent = "Clear all Viralweb data";
+    settingsClearError.textContent = response?.error || "Viralweb data could not be cleared.";
     return;
   }
   location.reload();
@@ -769,7 +842,7 @@ async function cancelNativeHandoff() {
   handoffCancel.disabled = false;
   handoffCancel.textContent = "Cancel crosspost";
   if (!response?.ok) {
-    handoffCancelError.textContent = response?.error || "The crosspost could not be cancelled.";
+    handoffCancelError.textContent = response?.error || "The repost could not be cancelled.";
     return;
   }
   publishBusy = false;
@@ -777,10 +850,17 @@ async function cancelNativeHandoff() {
   document.querySelector("#errors").textContent = "";
   setHandoffActive(false);
   renderPublishAction();
-  showToast("Crossposting cancelled. You can continue editing.");
+  showToast("Repost cancelled. You can continue editing.");
 }
 
 async function publish() {
+  await refreshLicenseState();
+  if (!currentLicense.canUse) {
+    const box = document.querySelector("#errors");
+    box.textContent = "Free reposts used. Activate a lifetime license to continue.";
+    openSettings();
+    return;
+  }
   const errors = validateDraft(draft); const box = document.querySelector("#errors"); box.textContent = errors.join(" "); if (errors.length) return;
   const selected = selectedNativeDestinations(draft), networkIds = selected.map(destination => destination.id), button = document.querySelector("#publish");
   // Request each selected platform's complete page/API/media bundle while the
@@ -839,7 +919,7 @@ async function publish() {
 }
 async function openNativeTray(networks, attemptId) {
   const response = await ext.runtime.sendMessage({ type: "OPEN_NATIVE_TRAY", sessionId, attemptId, text: draft.text, networks });
-  if (!response?.ok) throw new Error(response?.error || "Could not open the Crossposter handoff tray.");
+  if (!response?.ok) throw new Error(response?.error || "Could not open the Viralweb handoff tray.");
   return response;
 }
 
@@ -880,6 +960,7 @@ async function startNativeHandoff(networks, attemptId) {
   await saveDraftHistory(preparedForHistory);
   const response = await ext.runtime.sendMessage({ type: "OPEN_NATIVE_HANDOFF", sessionId, attemptId, networks, handoff: { text: draft.text, media: prepared, mediaErrors: failures } });
   if (!response?.ok) throw new Error(response?.error || "Could not prepare the native composers.");
+  await refreshLicenseState();
   if (failures.length) showToast(failures.join(" "));
   return {
     cancelled: response.cancelled === true,

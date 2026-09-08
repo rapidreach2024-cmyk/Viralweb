@@ -56,7 +56,7 @@ function sessionCard(session, index) {
   card.className = `session${session.id === selectedSessionId ? " active" : ""}`;
   const select = document.createElement("button"); select.className = "session-select"; select.type = "button";
   const expected = session.handoff?.networks?.length || 0, posted = session.handoff?.postedNetworks?.length || 0;
-  const title = document.createElement("strong"); title.textContent = `${expected && posted === expected ? "✓ " : ""}Crosspost ${index + 1}`;
+  const title = document.createElement("strong"); title.textContent = `${expected && posted === expected ? "✓ " : ""}Repost ${index + 1}`;
   const preview = document.createElement("span"); preview.textContent = session.preview || "New crosspost";
   select.append(title, preview);
   select.title = "Switch to this crosspost tab group";
@@ -69,7 +69,7 @@ function sessionCard(session, index) {
   card.append(select);
   if (session.id === selectedSessionId) {
     const close = document.createElement("button"); close.className = "session-close"; close.type = "button"; close.textContent = "×";
-    close.title = `Close Crosspost ${index + 1}`; close.setAttribute("aria-label", `Close Crosspost ${index + 1}`);
+    close.title = `Close Repost ${index + 1}`; close.setAttribute("aria-label", `Close Repost ${index + 1}`);
     close.onclick = async () => {
       const response = await ext.runtime.sendMessage({ type: "CLOSE_CROSSPOST_SESSION", sessionId: session.id }).catch(() => null);
       if (!response?.ok) status.textContent = response?.error || "This crosspost could not be closed.";
@@ -84,7 +84,7 @@ async function render(handoff) {
   if (!handoff || handoff.state === "idle") {
     releaseUrls(); targets.hidden = true; targets.replaceChildren();
     empty.hidden = false; content.hidden = true;
-    status.textContent = sessions.length ? "This crosspost is ready in Compose." : "No crossposts are open."; return;
+    status.textContent = sessions.length ? "This repost is ready in Compose." : "No reposts are open."; return;
   }
   releaseUrls();
   currentText = handoff.text || "";

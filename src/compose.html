@@ -1,14 +1,14 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Compose</title><link rel="stylesheet" href="styles.css"></head>
-<body><header class="topbar"><a class="logo"><img class="brand-icon" src="icons/icon-32.png" alt=""> Crossposter</a><div class="topbar-actions"><button id="showInfo" class="info-button" type="button" aria-label="About Crossposter and getting started">i</button><button id="historyOpen" class="topbar-settings" type="button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>History</button><button id="settingsOpen" class="topbar-settings" type="button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.07A1.7 1.7 0 0 0 8.97 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3v-4h.07A1.7 1.7 0 0 0 4.6 8.94a1.7 1.7 0 0 0-.34-1.88L4.2 7l2.83-2.83.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 10 3.04V3h4v.07a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06L19.8 7l-.06.06a1.7 1.7 0 0 0-.34 1.88A1.7 1.7 0 0 0 20.96 10H21v4h-.07A1.7 1.7 0 0 0 19.4 15Z"/></svg>Settings</button></div></header>
+<body><header class="topbar"><a class="logo"><img class="brand-icon" src="icons/icon-32.png" alt=""> Viralweb</a><div class="topbar-actions"><button id="showInfo" class="info-button" type="button" aria-label="About Viralweb and getting started">i</button><button id="historyOpen" class="topbar-settings" type="button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>History</button><button id="settingsOpen" class="topbar-settings" type="button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.07A1.7 1.7 0 0 0 8.97 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3v-4h.07A1.7 1.7 0 0 0 4.6 8.94a1.7 1.7 0 0 0-.34-1.88L4.2 7l2.83-2.83.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 10 3.04V3h4v.07a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06L19.8 7l-.06.06a1.7 1.7 0 0 0-.34 1.88A1.7 1.7 0 0 0 20.96 10H21v4h-.07A1.7 1.7 0 0 0 19.4 15Z"/></svg>Settings</button></div></header>
 <main class="layout">
   <section class="composer-card">
-    <div class="eyebrow">New crosspost</div><h1 id="composerTitle">Share it your way.</h1><p id="composerLede" class="lede">Polish the original, choose your destinations, then continue in each native composer.</p>
+    <div class="eyebrow">One-click Reposter</div><h1 id="composerTitle">Share it your way.</h1><p id="composerLede" class="lede">Repurpose one post for every platform in seconds. Edit once, publish everywhere.</p>
     <label class="field-label" for="postText">Post</label><textarea id="postText" maxlength="3000" placeholder="Loading…"></textarea>
     <div class="text-meta"><span id="source"></span><span id="count">0 / 3000</span></div>
     <div id="media" class="media-grid"></div>
     <div class="attach-row"><label class="attach-button"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add media<input id="file" type="file" accept="image/*,video/*" multiple hidden></label><button id="addLink" class="quiet" hidden><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m10.5 13.5 3-3m-6.3 6.3-1 .9a3.5 3.5 0 1 1-4.9-4.9l3.5-3.5a3.5 3.5 0 0 1 4.9 0m7.1-2.1 1-.9a3.5 3.5 0 1 1 4.9 4.9l-3.5 3.5a3.5 3.5 0 0 1-4.9 0"/></svg>Add source link</button></div>
   </section>
-  <aside class="publish-card"><div class="eyebrow">Destinations</div><h2>Where should it go?</h2><div id="destinations"></div><div id="errors" class="errors"></div><button id="publish" class="primary publish">Continue <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button><p class="fineprint">Crossposter opens and fills each native composer.<br />You review and post.</p></aside>
+  <aside class="publish-card"><div class="eyebrow">Destinations</div><h2>Where should it go?</h2><div id="destinations"></div><div id="licenseBanner" class="license-banner" hidden></div><div id="errors" class="errors"></div><button id="publish" class="primary publish">Continue <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button><p class="fineprint">Viralweb opens and fills each native composer.<br />You review and post.</p></aside>
 </main>
 <dialog id="permissionDialog" class="preferences-dialog permission-dialog" aria-labelledby="permissionTitle">
   <section class="preferences-card permission-card">
@@ -36,10 +36,19 @@
     <div id="settingsDestinations" class="preferences-options"></div>
     <label class="inline-action-preference"><span><strong>Show Crosspost shortcuts</strong><small>Add Crosspost to post actions on X, LinkedIn, Facebook, and Threads.</small></span><input id="settingsInlineActions" type="checkbox"></label>
     <p id="settingsError" class="errors" role="alert"></p>
+    <section class="settings-licensing" aria-labelledby="licenseDataTitle">
+      <strong id="licenseDataTitle">License</strong>
+      <p id="licenseCopy">Free reposts left: <span id="licenseRemaining">25</span></p>
+      <label class="license-key-label" for="licenseKey">License key</label>
+      <input id="licenseKey" type="text" placeholder="VW-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" autocomplete="off">
+      <p id="licenseError" class="errors" role="alert"></p>
+      <button id="licenseActivate" class="primary" type="button">Unlock lifetime Pro</button>
+      <p class="fineprint">A one-time license unlocks unlimited reposts forever.</p>
+    </section>
     <section class="settings-danger" aria-labelledby="clearDataTitle">
       <strong id="clearDataTitle">Clear all data</strong>
-      <p>Delete saved drafts, history, preferences, reminders, temporary media, and open Crossposter sessions.</p>
-      <button id="settingsClearData" class="danger-button" type="button">Clear all Crossposter data</button>
+      <p>Delete saved drafts, history, preferences, reminders, temporary media, and open Viralweb sessions.</p>
+      <button id="settingsClearData" class="danger-button" type="button">Clear all Viralweb data</button>
       <p id="settingsClearError" class="errors" role="alert"></p>
     </section>
     <footer class="clip-actions"><span id="settingsVersion" class="version-tag"></span><button id="settingsCancel" class="secondary" type="button">Cancel</button><button id="settingsSave" class="primary" type="button">Save settings</button></footer>
